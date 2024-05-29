@@ -1,0 +1,1 @@
+This is a chatbot that i made using HTML,CSS and Vanilla JS. i used the gemini api to generate the responses you can clone the chatbot in your local machine and then use your api key provided by gemini to generate responses.
