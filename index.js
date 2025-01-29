@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GEMINI_API_KEY } from "./config.js";
 
 const sendMessage = document.querySelector(".chat-input span");
 const chatInput = document.querySelector(".chat-input textarea");
@@ -7,16 +8,15 @@ const chatbotToggler = document.querySelector(".chatbot-toggler");
 
 let userMessage;
 
-// Gemini API key
-const API_KEY = "AIzaSyCRY1PNhEH2HtYpbM5ix7Aqw0bG4dHoPZ4";
-const genAI = new GoogleGenerativeAI(API_KEY);
-
+// Gemini API Configuration
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const chat = model.startChat({
   history: [],
   generationConfig: {
-    maxOutputTokens: 25,
+    maxOutputTokens: 100, // Increased token limit for longer responses
+    temperature: 0.7,     // Added temperature for more creative responses
   },
 });
 
@@ -28,26 +28,39 @@ const createChatLi = (message, className) => {
   return chatLi;
 };
 
-const generateResponse = (chatLi) => {
-
-  chat.sendMessage(userMessage).then((response) => {
-    const msg = response.response.candidates[0].content.parts[0].text;
+const generateResponse = async (chatLi) => {
+  try {
+    const result = await chat.sendMessage(userMessage);
+    const msg = result.response.candidates[0].content.parts[0].text;
     chatLi.innerHTML = `<span class="material-symbols-outlined">smart_toy</span><p>${msg}</p>`;
-  });
+  } catch (error) {
+    chatLi.innerHTML = `<span class="material-symbols-outlined">error</span><p>Oops! Something went wrong. Please try again.</p>`;
+    console.error("Error:", error);
+  }
 };
 
 const handleChat = () => {
-  userMessage = chatInput.value;
+  userMessage = chatInput.value.trim();
   if (!userMessage) return;
 
-  chatbox.appendChild(createChatLi(userMessage, "outgoing"));
   chatInput.value = "";
+  chatbox.appendChild(createChatLi(userMessage, "outgoing"));
+  chatbox.scrollTo(0, chatbox.scrollHeight);
+
   setTimeout(() => {
-    const chatLi = createChatLi("THINKING...", "incoming");
-    chatbox.appendChild(chatLi);
-    generateResponse(chatLi);
-  }, 1000);
+    const incomingChatLi = createChatLi("Thinking...", "incoming");
+    chatbox.appendChild(incomingChatLi);
+    chatbox.scrollTo(0, chatbox.scrollHeight);
+    generateResponse(incomingChatLi);
+  }, 600);
 };
+
+chatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    handleChat();
+  }
+});
 
 sendMessage.addEventListener("click", handleChat);
 chatbotToggler.addEventListener("click", () =>
