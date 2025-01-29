@@ -2,6 +2,8 @@
 
 A simple web application built with vanilla JavaScript that integrates with Google's Gemini AI API to provide conversational AI capabilities.
 
+![image](https://github.com/user-attachments/assets/49a1fd5b-c8d8-45e6-83f5-d1f42b0a2b5d)
+
 ## Setup
 
 1. Clone the repository
